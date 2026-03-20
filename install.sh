@@ -211,7 +211,7 @@ print_link() {
 	LINK="tg://proxy?server=${SERVER_IP}&port=${LISTEN_PORT}&secret=${LONG_SECRET}"
 	echo ""
 	echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
-	echo -e "${GREEN}║  Ссылка для Telegram (Fake TLS)                         ║${NC}"
+	echo -e "${GREEN}║  Ссылка для Telegram (Fake TLS)                          ║${NC}"
 	echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 	echo ""
 	echo -e "  ${GREEN}${LINK}${NC}"
