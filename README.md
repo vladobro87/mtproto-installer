@@ -1,6 +1,6 @@
 # MTProto Proxy (Fake TLS) + Traefik
 
-Один порт **443**: по SNI трафик к домену маскировки (например `1c.ru`) уходит в MTProxy, остальное можно отдавать другим сервисам через Traefik.
+Один порт **4443**: по SNI трафик к домену маскировки (например `1c.ru`) уходит в MTProxy, остальное можно отдавать другим сервисам через Traefik.
 
 - **Telemt** — современный MTProxy (Rust, distroless), поддерживает Fake TLS.
 - **Traefik** — маршрутизация TCP по SNI с TLS passthrough.
@@ -11,19 +11,19 @@
 curl -sSL https://raw.githubusercontent.com/vladobro87/mtproto-installer/main/install.sh | bash
 ```
 
-Скрипт установит Docker (если нужно), скачает `docker-compose.yml`, конфиги Traefik и шаблон Telemt из репозитория [2FrogsStudio/mtproto-installer](https://github.com/2FrogsStudio/mtproto-installer), сгенерирует секрет, подставит домен маскировки и запустит контейнеры. В конце выведет ссылку вида `tg://proxy?server=...&port=443&secret=...` — добавьте её в Telegram (Настройки → Данные и память → Использовать прокси).
+Скрипт установит Docker (если нужно), скачает `docker-compose.yml`, конфиги Traefik и шаблон Telemt из репозитория [vladobro87/mtproto-installer](https://github.com/vladobro87/mtproto-installer), сгенерирует секрет, подставит домен маскировки и запустит контейнеры. В конце выведет ссылку вида `tg://proxy?server=...&port=4443&secret=...` — добавьте её в Telegram (Настройки → Данные и память → Использовать прокси).
 
 - Домен маскировки по умолчанию: `1c.ru`. Интерактивно можно ввести другой; без TTY: `FAKE_DOMAIN=sberbank.ru curl -sSL ... | bash`.
 - Каталог установки по умолчанию: `./mtproxy-data`. Другой: `INSTALL_DIR=/opt/mtproxy curl -sSL ... | bash`.
 
 ## Локальный запуск (клонирование репозитория)
 
-После `git clone https://github.com/2FrogsStudio/mtproto-installer.git && cd mtproto-installer` можно запустить `./install.sh` — скрипт по умолчанию качает файлы с того же GitHub. Либо настроить вручную и поднять без скрипта:
+После `git clone https://github.com/vladobro87/mtproto-installer.git && cd mtproto-installer` можно запустить `./install.sh` — скрипт по умолчанию качает файлы с того же GitHub. Либо настроить вручную и поднять без скрипта:
 
 1. Сгенерируйте секрет: `openssl rand -hex 16`. Скопируйте `telemt.toml.example` в `telemt.toml`, подставьте секрет и при необходимости домен в `censorship.tls_domain`.
 2. В `traefik/dynamic/tcp.yml` домен в `HostSNI(...)` должен совпадать с `censorship.tls_domain` в `telemt.toml`.
 3. Запуск: `docker compose up -d`.
-4. Ссылка: `tg://proxy?server=ВАШ_IP&port=443&secret=ВАШ_СЕКРЕТ`.
+4. Ссылка: `tg://proxy?server=ВАШ_IP&port=4443&secret=ВАШ_СЕКРЕТ`.
 
 ## Устранение проблем
 
@@ -37,21 +37,21 @@ curl -sSL https://raw.githubusercontent.com/vladobro87/mtproto-installer/main/in
    ```
    Оба сервиса должны быть в состоянии `Up`.
 
-2. **Порт 443 слушается**
+2. **Порт 4443 слушается**
    ```bash
-   ss -tlnp | grep 443
+   ss -tlnp | grep 4443
    ```
-   Должен быть процесс docker/proxy на `:443`.
+   Должен быть процесс docker/proxy на `:4443`.
 
 3. **Файрвол и облачный доступ**
-   - Локально: `sudo ufw status` — если активен, нужен `sudo ufw allow 443/tcp && sudo ufw reload`.
-   - В панели VPS/облака (AWS Security Group, GCP firewall и т.п.) должен быть открыт входящий TCP 443.
+   - Локально: `sudo ufw status` — если активен, нужен `sudo ufw allow 4443/tcp && sudo ufw reload`.
+   - В панели VPS/облака (AWS Security Group, GCP firewall и т.п.) должен быть открыт входящий TCP 4443.
 
 4. **IP в ссылке совпадает с сервером**
    На сервере: `curl -s ifconfig.me`. В ссылке `tg://proxy?server=...` должен быть этот IP (или ваш домен, если он указывает на этот сервер).
 
 5. **Ссылка с полным Fake TLS-секретом**
-   Должна быть из вывода установки (формат `ee` + 32 hex + hex домена). Если в выводе скрипта был только короткий секрет (32 символа) — правильную ссылку можно взять из логов Telemt: `docker compose logs mtproxy-telemt` (строка «EE-TLS: tg://proxy?…»), замените в ней **port=1234** на **port=443**.
+   Должна быть из вывода установки (формат `ee` + 32 hex + hex домена). Если в выводе скрипта был только короткий секрет (32 символа) — правильную ссылку можно взять из логов Telemt: `docker compose logs mtproxy-telemt` (строка «EE-TLS: tg://proxy?…»), замените в ней **port=1234** на **port=4443**.
 
 6. **Домен маскировки совпадает в конфигах**
    ```bash
@@ -62,18 +62,18 @@ curl -sSL https://raw.githubusercontent.com/vladobro87/mtproto-installer/main/in
 
 7. **Проверка с другой машины**
    ```bash
-   openssl s_client -connect ВАШ_IP:443 -servername 1c.ru </dev/null
+   openssl s_client -connect ВАШ_IP:4443 -servername 1c.ru </dev/null
    ```
-   Подставьте ваш IP и домен из `tls_domain`. Должно быть установлено TLS-соединение (в конце может быть «Certificate chain» или «Verify return code»). Если «Connection refused» — не открыт 443 или файрвол.
+   Подставьте ваш IP и домен из `tls_domain`. Должно быть установлено TLS-соединение (в конце может быть «Certificate chain» или «Verify return code»). Если «Connection refused» — не открыт 4443 или файрвол.
 
-- **`Error while peeking client hello bytes error=EOF`** в логах Traefik — обычно это проверки доступности (health check) или сканеры: кто-то открывает TCP на 443 и закрывает соединение до TLS. На работу прокси не влияет, можно игнорировать.
+- **`Error while peeking client hello bytes error=EOF`** в логах Traefik — обычно это проверки доступности (health check) или сканеры: кто-то открывает TCP на 4443 и закрывает соединение до TLS. На работу прокси не влияет, можно игнорировать.
 
 ## Удаление
 
 **Скриптом** (из каталога с репозиторием или скачав скрипт):
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/2FrogsStudio/mtproto-installer/main/uninstall.sh | bash
+curl -sSL https://raw.githubusercontent.com/vladobro87/mtproto-installer/main/uninstall.sh | bash
 ```
 
 Каталог по умолчанию — `./mtproxy-data`. Другой каталог или без подтверждения: `./uninstall.sh -y /path/to/mtproxy-data`.
@@ -108,7 +108,7 @@ curl -sSL https://raw.githubusercontent.com/2FrogsStudio/mtproto-installer/main/
 ## Безопасность
 
 - Ссылку прокси не публикуйте.
-- Рекомендуется порт 443 и домен маскировки с рабочим HTTPS (1c.ru, sberbank.ru и т.п.).
+- Рекомендуется порт 4443 и домен маскировки с рабочим HTTPS (1c.ru, sberbank.ru и т.п.).
 - Регулярно обновляйте образы: `docker compose pull && docker compose up -d`.
 
 ## Структура (после install.sh)
