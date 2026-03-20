@@ -30,7 +30,7 @@ curl -sSL https://raw.githubusercontent.com/vladobro87/mtproto-installer/main/in
 **Скриптом** (из каталога с репозиторием или скачав скрипт):
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/2FrogsStudio/mtproto-installer/main/uninstall.sh | bash
+curl -sSL https://raw.githubusercontent.com/vladobro87/mtproto-installer/main/uninstall.sh | bash
 ```
 
 Каталог по умолчанию — `./mtproxy-data`. Другой каталог или без подтверждения: `./uninstall.sh -y /path/to/mtproxy-data`.
