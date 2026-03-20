@@ -5,7 +5,7 @@ REPO_RAW="${REPO_RAW:-https://raw.githubusercontent.com/2FrogsStudio/mtproto-ins
 INSTALL_DIR="${INSTALL_DIR:-$(pwd)/mtproxy-data}"
 FAKE_DOMAIN="${FAKE_DOMAIN:-1c.ru}"
 TELEMT_INTERNAL_PORT="${TELEMT_INTERNAL_PORT:-1234}"
-LISTEN_PORT="${LISTEN_PORT:-443}"
+LISTEN_PORT="${LISTEN_PORT:-4443}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -81,10 +81,10 @@ is_port_in_use() {
 }
 
 prompt_port() {
-	local suggested=443
-	if is_port_in_use 443; then
-		warn "Порт 443 занят."
-		suggested=1443
+	local suggested=4443
+	if is_port_in_use 4443; then
+		warn "Порт 4443 занят."
+		suggested=14443
 		while true; do
 			if [[ -t 0 ]]; then
 				echo -n "Введите порт [${suggested}]: "
@@ -107,9 +107,9 @@ prompt_port() {
 		done
 	else
 		if [[ -t 0 ]]; then
-			echo -n "Порт для прокси [443]: "
+			echo -n "Порт для прокси [4443]: "
 			read -r input
-			[[ -n "$input" ]] && input="$input" || input=443
+			[[ -n "$input" ]] && input="$input" || input=4443
 			while true; do
 				if [[ "$input" =~ ^[0-9]+$ ]] && (( input >= 1 && input <= 65535 )); then
 					if is_port_in_use "$input"; then
@@ -122,9 +122,9 @@ prompt_port() {
 					fi
 				else
 					warn "Введите число от 1 до 65535."
-					echo -n "Введите порт [443]: "
+					echo -n "Введите порт [4443]: "
 					read -r input
-					[[ -z "$input" ]] && input=443
+					[[ -z "$input" ]] && input=4443
 				fi
 			done
 		fi
@@ -152,7 +152,7 @@ download_and_configure() {
 	mkdir -p "${INSTALL_DIR}/traefik/dynamic" "${INSTALL_DIR}/traefik/static"
 
 	fetch "${REPO_RAW}/docker-compose.yml" "${INSTALL_DIR}/docker-compose.yml"
-	sed "s/443:443/${LISTEN_PORT}:443/" "${INSTALL_DIR}/docker-compose.yml" > "${INSTALL_DIR}/docker-compose.yml.tmp" && mv "${INSTALL_DIR}/docker-compose.yml.tmp" "${INSTALL_DIR}/docker-compose.yml"
+	sed "s/4443:4443/${LISTEN_PORT}:4443/" "${INSTALL_DIR}/docker-compose.yml" > "${INSTALL_DIR}/docker-compose.yml.tmp" && mv "${INSTALL_DIR}/docker-compose.yml.tmp" "${INSTALL_DIR}/docker-compose.yml"
 	fetch "${REPO_RAW}/traefik/dynamic/tcp.yml" "${INSTALL_DIR}/traefik/dynamic/tcp.yml"
 	fetch "${REPO_RAW}/telemt.toml.example" "${INSTALL_DIR}/telemt.toml.example"
 
