@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     command:
       - "--api.dashboard=false"
-      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.address=:4443"
       - "--providers.file.directory=/etc/traefik/dynamic"
       - "--providers.file.watch=true"
     ports:
